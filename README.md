@@ -1,3 +1,2 @@
 # Clicker
-A simple mouse clicker
-Note: Only works on Windows computers
+A simple mouse clicke r<br />Note: Only works on Windows computers
