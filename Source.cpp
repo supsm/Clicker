@@ -87,6 +87,15 @@ int main()
 		kinput.ki.wVk = wslot;
 		s = true;
 	}
+	else if (ch == 'f' || ch == 'F')
+	{
+		minput.type = INPUT_MOUSE;
+		minput.mi.dwFlags = (MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP);
+		// go into f1
+		// analyze center pixel (bobber) to see if underwater
+		// if it's blueish (not bobber color) then delay and right click
+		// right click again (after short delay), repeat 2-3
+	}
 	system("CLS");
 	minput.type = INPUT_MOUSE;
 	minput.mi.time = 0;
@@ -154,8 +163,8 @@ keys:
 						goto start;
 					}
 				}
-				Sleep(32);
 			}
+			Sleep(32);
 		}
 	}
 	enterkeys:
@@ -204,41 +213,46 @@ start:
 	}
 	fout.close();
 	system("CLS");
-	Sleep(512);
+	Sleep(256);
 	cout << "Press the start key to start" << endl;
 	while (GetAsyncKeyState(start) == 0)
 	{
 		Sleep(32);
 	}
 	system("CLS");
+	while (GetAsyncKeyState(start) != 0)
+	{
+		Sleep(32);
+	}
 	cout << "Press the end key to end" << endl;
-	Sleep(512);
 	while (true)
 	{
 		int startt = clock();
 		int curt = clock();
-		while (curt - startt >= 1000 / cps)
+		while (curt - startt <= 1000 / cps)
 		{
+			curt = clock();
 			if (GetAsyncKeyState(end) != 0)
 			{
 				system("CLS");
-				cout << "Press the start key to continue" << endl;
-				Sleep(512);
-				while (true)
+				while (GetAsyncKeyState(end) != 0)
 				{
-					if (GetAsyncKeyState(start) != 0)
-					{
-						break;
-					}
+					Sleep(32);
+				}
+				cout << "Press the start key to continue" << endl;
+				while (GetAsyncKeyState(start) == 0)
+				{
 					Sleep(32);
 				}
 				system("CLS");
+				while (GetAsyncKeyState(start) != 0)
+				{
+					Sleep(32);
+				}
 				cout << "Press the end key to end" << endl;
-				Sleep(512);
 			}
 			Sleep(min(32, curt - startt));
 		}
-
 		if (s && counter % 256 == 0)
 		{
 			kinput.ki.wVk = fslot;
@@ -264,7 +278,5 @@ start:
 		}
 		SendInput(1, &minput, sizeof(INPUT));
 		counter++;
-
 	}
-	system("CLS");
 }
