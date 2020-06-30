@@ -3,6 +3,7 @@
 #include <iostream>
 #include <time.h>
 #include <Windows.h>
+#include <WinUser.h>
 using namespace std;
 
 int main()
@@ -19,7 +20,6 @@ int main()
 	fin >> start >> end >> cps2 >> button2;
 	button = button2;
 	cps = cps2;
-button:
 	cout << "Which button would you like to click?\nL(eft)\nM(iddle)\nR(ight)\n";
 	ch = _getch();
 	if (ch == 'l' || ch == 'L')
@@ -37,7 +37,10 @@ button:
 	else if (ch == 's' || ch == 'S')
 	{
 		system("CLS");
-		Sleep(256);
+		while (GetAsyncKeyState(83) != 0)
+		{
+			Sleep(128);
+		}
 		cout << "Enter weapon slot: ";
 		while (true)
 		{
@@ -46,8 +49,11 @@ button:
 				if (GetAsyncKeyState(i) == -32768)
 				{
 					wslot = i;
-					Sleep(256);
 					system("CLS");
+					while (GetAsyncKeyState(i) != 0)
+					{
+						Sleep(128);
+					}
 					cout << "Enter food slot: ";
 					while (true)
 					{
@@ -56,12 +62,19 @@ button:
 							if (GetAsyncKeyState(j) == -32768)
 							{
 								fslot = j;
+								system("CLS");
+								while (GetAsyncKeyState(j) != 0)
+								{
+									Sleep(128);
+								}
 								goto place;
 							}
 						}
+						Sleep(32);
 					}
 				}
 			}
+			Sleep(32);
 		}
 	place:
 		button = 'l';
@@ -76,7 +89,7 @@ button:
 	}
 	system("CLS");
 	minput.type = INPUT_MOUSE;
-	minput.mi.mouseData = 0;
+	minput.mi.time = 0;
 	if (button == 'l')
 	{
 		minput.mi.dwFlags = (MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP);
@@ -89,8 +102,6 @@ button:
 	{
 		minput.mi.dwFlags = (MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP);
 	}
-	minput.mi.dwExtraInfo = NULL;
-	minput.mi.time = 0;
 	if (s)
 	{
 		goto keys;
@@ -128,15 +139,28 @@ keys:
 	if (start != -1 && end != -1)
 	{
 		cout << "Start Key: " << start << "\nEnd Key: " << end << "\n\nWould you like to make any changes? (y/n)\n";
-	yn:
-		ch = _getch();
-		if (ch != 'y' && ch != 'Y')
+		while (true)
 		{
-			goto start;
+			for (int i = 8; i < 255; i++)
+			{
+				if (GetAsyncKeyState(i) != 0)
+				{
+					if (i == 89)
+					{
+						goto enterkeys;
+					}
+					else
+					{
+						goto start;
+					}
+				}
+				Sleep(32);
+			}
 		}
 	}
-	Sleep(512);
+	enterkeys:
 	system("CLS");
+	Sleep(512);
 	cout << "Press the start key\n";
 	while (true)
 	{
@@ -148,10 +172,11 @@ keys:
 				goto endstart;
 			}
 		}
+		Sleep(32);
 	}
 endstart:
-	Sleep(512);
 	system("CLS");
+	Sleep(512);
 	cout << "Press the end key\n";
 	while (true)
 	{
@@ -163,9 +188,11 @@ endstart:
 				goto start;
 			}
 		}
+		Sleep(32);
 	}
 start:
-	ofstream fout("clicker.options");
+	ofstream fout;
+	fout.open("clicker.options");
 	fout << start << " " << end;
 	if (s)
 	{
@@ -175,20 +202,23 @@ start:
 	{
 		fout << " " << cps << " " << button;
 	}
+	fout.close();
 	system("CLS");
 	Sleep(512);
 	cout << "Press the start key to start" << endl;
-	while (GetAsyncKeyState(start) == 0) {}
+	while (GetAsyncKeyState(start) == 0)
+	{
+		Sleep(32);
+	}
 	system("CLS");
 	cout << "Press the end key to end" << endl;
 	Sleep(512);
 	while (true)
 	{
-		double startt = clock();
-		double curt = clock();
-		while (curt - startt < 1000 / cps)
+		int startt = clock();
+		int curt = clock();
+		while (curt - startt >= 1000 / cps)
 		{
-			curt = clock();
 			if (GetAsyncKeyState(end) != 0)
 			{
 				system("CLS");
@@ -200,12 +230,15 @@ start:
 					{
 						break;
 					}
+					Sleep(32);
 				}
 				system("CLS");
 				cout << "Press the end key to end" << endl;
 				Sleep(512);
 			}
+			Sleep(min(32, curt - startt));
 		}
+
 		if (s && counter % 256 == 0)
 		{
 			kinput.ki.wVk = fslot;
@@ -229,7 +262,6 @@ start:
 			kinput.ki.dwFlags = KEYEVENTF_KEYUP;
 			SendInput(1, &kinput, sizeof(INPUT));
 		}
-		Sleep(64);
 		SendInput(1, &minput, sizeof(INPUT));
 		counter++;
 
