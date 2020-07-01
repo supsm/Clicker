@@ -275,6 +275,7 @@ start:
 			Sleep(64);
 			kinput.ki.dwFlags = KEYEVENTF_KEYUP;
 			SendInput(1, &kinput, sizeof(INPUT));
+			counter = 0;
 		}
 		SendInput(1, &minput, sizeof(INPUT));
 		counter++;
